@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>3D-Gebäude Deutschland (Cesium)</title>
+  <!-- CesiumJS, wie im Beispiel von basemap.de -->
+  <script src="https://cesium.com/downloads/cesiumjs/releases/1.137/Build/Cesium/Cesium.js"></script>
+  <link href="https://cesium.com/downloads/cesiumjs/releases/1.137/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+  <style>
+    html, body, #cesiumContainer {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body>
+  <div id="cesiumContainer"></div>
+  <script>
+    // Quelle: basemap.de 3D – https://basemap.de/produkte-und-dienste/3d/
+    // Ein Cesium-Ion-Token ist nicht nötig, weil nur freie Dienste genutzt werden.
+    const GEBAEUDE_URL = 'https://sgx.geodatenzentrum.de/gdz_basemapde_3d_gebaeude/lod2_4326_dgm5.json';
+    const GELAENDE_URL = 'https://sgx.geodatenzentrum.de/gdz_basemapde_3d_gelaende/dgm5_4326_mesh/';
+
+    const viewer = new Cesium.Viewer('cesiumContainer', {
+      baseLayer: false,            // keine Ion-Standardkarte laden
+      terrain: new Cesium.Terrain(Cesium.CesiumTerrainProvider.fromUrl(GELAENDE_URL)),
+      geocoder: false,
+      baseLayerPicker: false,
+      sceneModePicker: false,
+      navigationHelpButton: false,
+      animation: false,
+      timeline: false,
+      shadows: false
+    });
+
+    // Hintergrund außerhalb Deutschlands: OpenStreetMap
+    viewer.imageryLayers.addImageryProvider(new Cesium.UrlTemplateImageryProvider({
+      url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+      maximumLevel: 19,
+      credit: new Cesium.Credit('<a href="https://www.openstreetmap.org/copyright" target="_blank">© OpenStreetMap contributors</a>', true)
+    }));
+
+    // Hintergrund in Deutschland: basemap.de als WMS (Cesium kann keine Vector Tiles)
+    viewer.imageryLayers.addImageryProvider(new Cesium.WebMapServiceImageryProvider({
+      url: 'https://sgx.geodatenzentrum.de/wms_basemapde',
+      layers: 'de_basemapde_web_raster_farbe',
+      parameters: { transparent: true, format: 'image/png' },
+      credit: new Cesium.Credit('© basemap.de / BKG', true)
+    }));
+
+    // LoD2-Gebäude als 3D Tiles laden und nach Fläche einfärben
+    (async function () {
+      try {
+        const tileset = await Cesium.Cesium3DTileset.fromUrl(GEBAEUDE_URL, { showOutline: false });
+        tileset.style = new Cesium.Cesium3DTileStyle({
+          color: {
+            conditions: [
+              ["${surface} === 'wall'", "color('#f2f2f2')"],
+              ["${surface} === 'roof'", "color('#20b581')"],
+              ["${surface} === 'bridge'", "color('#999999')"],
+              ['true', "color('#f2f2f2')"]
+            ]
+          }
+        });
+        viewer.scene.primitives.add(tileset);
+      } catch (error) {
+        console.error('Gebäude konnten nicht geladen werden:', error);
+      }
+    })();
+
+    // Startansicht: Mainzer Innenstadt mit Blick nach Norden auf den Dom
+    viewer.camera.setView({
+      destination: Cesium.Cartesian3.fromDegrees(8.2700, 49.9890, 650),
+      orientation: {
+        heading: Cesium.Math.toRadians(15),
+        pitch: Cesium.Math.toRadians(-30),
+        roll: 0
+      }
+    });
+  </script>
+</body>
+</html>

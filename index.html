@@ -157,6 +157,7 @@
 
     .panel { padding: 3rem 0; }
     .panel[hidden] { display: none; }
+    .panel:focus { outline: none; }
     /* Einblend-Animation, sobald ein Panel sichtbar wird */
     .panel.is-active { animation: panel-in 0.35s ease both; }
     @keyframes panel-in {
@@ -183,6 +184,7 @@
       display: block;
       width: 100%;
       max-width: 14rem;
+      height: auto;
       aspect-ratio: 1;
       object-fit: cover;
       border-radius: var(--radius);
@@ -262,6 +264,29 @@
       font-variant-numeric: tabular-nums;
     }
     .status { color: var(--muted); }
+
+    /* ---------- Eingebettete Karten (iframes) ---------- */
+    .maps { display: grid; gap: 2.5rem; margin-bottom: 3.5rem; }
+    .map h3 { font-size: 1.0625rem; margin: 0 0 0.25rem; }
+    .map p { margin: 0 0 1rem; color: var(--muted); font-size: 0.9375rem; max-width: 40rem; }
+    .map-frame {
+      position: relative;
+      aspect-ratio: 16 / 10;
+      min-height: 320px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      background: var(--surface);
+    }
+    .map-frame iframe {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+    .map .source { margin: 0.5rem 0 0; font-size: 0.8125rem; }
 
     /* ---------- Kontakt: fixiert unten rechts ---------- */
     .contact {
@@ -399,6 +424,49 @@
       <!-- Projects -->
       <section class="panel" id="projects" role="tabpanel" aria-labelledby="tab-projects" tabindex="0" hidden>
         <h2>Projects</h2>
+
+        <div class="maps">
+          <article class="map">
+            <h3>Basiskarte (Folium)</h3>
+            <p>Interaktive Webkarte, mit Folium in Python erzeugt und als HTML-Datei eingebunden.</p>
+            <div class="map-frame">
+              <iframe data-src="maps/map_1_basiskarte.html" title="Folium-Basiskarte von Europa" loading="lazy"></iframe>
+            </div>
+            <p class="source"><a href="maps/map_1_basiskarte.html" target="_blank" rel="noopener">Vollbild öffnen</a></p>
+          </article>
+
+          <article class="map">
+            <h3>3D-Gebäude Deutschland (Cesium)</h3>
+            <p>LoD2-Gebäude und Gelände (DGM5) von basemap.de als 3D Tiles in CesiumJS – Startansicht Mainz.</p>
+            <div class="map-frame">
+              <iframe data-src="maps/cesium_3d_gebaeude.html" title="3D-Gebäude von basemap.de in Cesium" loading="lazy" allowfullscreen></iframe>
+            </div>
+            <p class="source">
+              Daten: <a href="https://basemap.de/produkte-und-dienste/3d/" target="_blank" rel="noopener noreferrer">basemap.de 3D</a> ·
+              <a href="maps/cesium_3d_gebaeude.html" target="_blank" rel="noopener">Vollbild öffnen</a>
+            </p>
+          </article>
+
+          <article class="map">
+            <h3>Explorationskarte (Kepler.gl)</h3>
+            <p>Mit Kepler.gl erstellte Karte, als HTML exportiert und eingebunden.</p>
+            <div class="map-frame">
+              <iframe data-src="maps/kepler_map.html" title="Kepler.gl-Karte" loading="lazy"></iframe>
+            </div>
+            <p class="source"><a href="maps/kepler_map.html" target="_blank" rel="noopener">Vollbild öffnen</a></p>
+          </article>
+
+          <article class="map">
+            <h3>GeoJSON-Extrusion (Three.js)</h3>
+            <p>Gebäudegrundrisse aus einer GeoJSON-Datei, in Three.js nach Höhe extrudiert und eingefärbt (Beispieldaten).</p>
+            <div class="map-frame">
+              <iframe data-src="maps/threejs_gebaeude.html" title="3D-Extrusion von Gebäuden mit Three.js" loading="lazy"></iframe>
+            </div>
+            <p class="source"><a href="maps/threejs_gebaeude.html" target="_blank" rel="noopener">Vollbild öffnen</a></p>
+          </article>
+        </div>
+
+        <h2>Links</h2>
         <ul class="gallery">
           <li>
             <a class="card" href="#" target="_blank" rel="noopener noreferrer" aria-label="GitHub (öffnet in neuem Tab)">
@@ -506,6 +574,13 @@
           t.tabIndex = active ? 0 : -1;
           panel.hidden = !active;
           panel.classList.toggle('is-active', active);
+          // Karten erst laden, wenn ihr Tab zum ersten Mal geöffnet wird
+          if (active) {
+            panel.querySelectorAll('iframe[data-src]').forEach(function (frame) {
+              frame.src = frame.getAttribute('data-src');
+              frame.removeAttribute('data-src');
+            });
+          }
         });
         moveIndicator(tab);
         if (focus) tab.focus();
@@ -533,6 +608,8 @@
         return '#' + t.getAttribute('aria-controls') === location.hash;
       })[0] || tabs[0];
       select(start);
+      // Sprung des Browsers zum Anker verhindern, die Seite startet oben
+      if (location.hash) window.scrollTo(0, 0);
     })();
 
     /* ---------- News aus assets/news.json ---------- */
