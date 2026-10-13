@@ -1,0 +1,23 @@
+[
+  {
+    "date": "2026-10-10",
+    "title": "Neue Web-Map zu Radwegen online",
+    "text": "Meine interaktive Karte zeigt Radwege und Abstellanlagen in Münster – erstellt mit Leaflet und OpenStreetMap-Daten.",
+    "image": "https://picsum.photos/600/400?random=4",
+    "imageAlt": "Platzhalterbild Radwege-Karte"
+  },
+  {
+    "date": "2026-09-22",
+    "title": "Vortrag beim GIS-Stammtisch",
+    "text": "Beim lokalen GIS-Stammtisch habe ich gezeigt, wie sich Satellitendaten mit wenigen Zeilen Python auswerten lassen.",
+    "image": "https://picsum.photos/600/400?random=5",
+    "imageAlt": "Platzhalterbild Vortrag"
+  },
+  {
+    "date": "2026-09-05",
+    "title": "Persönliche Website neu gestaltet",
+    "text": "Die Seite hat jetzt Tabs, einen Night Mode und News, die automatisch aus einer JSON-Datei geladen werden.",
+    "image": "https://picsum.photos/600/400?random=6",
+    "imageAlt": "Platzhalterbild Website"
+  }
+]
